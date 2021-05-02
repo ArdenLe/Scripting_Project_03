@@ -10,9 +10,11 @@ public class LevelController : MonoBehaviour
         Cursor.visible = false;
     }
 
-   
     void Update()
     {
-        
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            Application.Quit();
+        }
     }
 }
