@@ -11,21 +11,26 @@ public class PlayerScript : MonoBehaviour
     public Transform cam;
     public GameObject art1;
     public GameObject art2;
+    public AudioClip dashSFX;
+    public ParticleSystem dashVFX;
+    public ParticleSystem dashTrail;
     [Header("Adjustables")]
     public float baseSpeed = 6f;
     public float runSpeed = 12f;
-    public float dashSpeed = 18f;
-    public float dashTime = 1f;
+    public float dashSpeed = 15f;
+    public float dashTime = 0.3f;
     public float turnSmoothTime = 0.1f;
     float turnSmoothVelocity;
     bool moving = false;
     bool sprinting = false;
     public bool dashing = false;
     float currentSpeed;
+    AudioSource _as = null;
 
     private void Awake()
     {
         currentSpeed = baseSpeed;
+        _as = GetComponent<AudioSource>();
     }
 
     void Update()
@@ -52,7 +57,14 @@ public class PlayerScript : MonoBehaviour
             anim.SetBool("isWalking", false);
         }
 
-        sprinting = Input.GetKey(KeyCode.Mouse1);
+        if (Input.GetKeyDown(KeyCode.Mouse1) && dashing == false)
+        {
+            StartCoroutine(Dash());
+            StartCoroutine(DashAnimation());
+            sprinting = true;
+            _as.PlayOneShot(dashSFX, _as.volume);
+        }
+
         if (sprinting && moving)
         {
             currentSpeed = runSpeed;
@@ -62,12 +74,7 @@ public class PlayerScript : MonoBehaviour
         {
             currentSpeed = baseSpeed;
             anim.SetBool("isRunning", false);
-        }
-
-        if (Input.GetKeyDown(KeyCode.Mouse1) && dashing == false)
-        {
-            StartCoroutine(Dash());
-            StartCoroutine(DashAnimation());
+            sprinting = false;
         }
     }
 
@@ -101,6 +108,8 @@ public class PlayerScript : MonoBehaviour
 
         yield return new WaitForSeconds(dashTime);
 
+        dashVFX.Play();
+        dashTrail.Play();
         anim.SetBool("isDashing", false);
         dashing = false;
         art1.SetActive(true);
